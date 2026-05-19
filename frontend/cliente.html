@@ -63,7 +63,7 @@ const ETAPAS = [
   { icon: 'fa-envelope-open-text', titulo: 'Orçamento Enviado — Aguardando Aprovação', msg: () => 'Seu orçamento foi elaborado e enviado! Por favor, entre em contato conosco para aprovação e assim que confirmado daremos início imediato ao serviço. ✅' },
   { icon: 'fa-thumbs-up', titulo: 'Orçamento Aprovado', msg: () => 'Ótimo! Orçamento aprovado! Seu veículo já está na fila de serviço e em breve nossos mecânicos darão início ao reparo. Obrigado pela confiança! 💪' },
   { icon: 'fa-cogs', titulo: 'Em Serviço', msg: () => 'Seu veículo está em serviço agora! Nossa equipe está trabalhando com cuidado e dedicação para resolver tudo o mais rápido possível. 🛠️' },
-  { icon: 'fa-check-circle', titulo: 'Concluído — Pode Buscar Seu Carro!', msg: nome => `Parabéns ${nome}! O serviço no seu veículo foi concluído com sucesso! Você já pode vir buscar seu carro. Obrigado pela confiança! Até a próxima! 🚗💨` }
+  { icon: 'fa-check-circle', titulo: 'Concluído — Pode Buscar Seu Carro!', msg: nome => `${nome}, o serviço no seu veículo foi concluído com sucesso! Você já pode vir buscar seu carro. Obrigado por confiar em nós! Até a próxima! 🚗💨` }
 ];
 
 const params = new URLSearchParams(location.search);
@@ -92,7 +92,7 @@ async function carregar() {
   try {
     const r = await fetch(`/api/atendimentos/${ID}`);
     if (!r.ok) {
-      if (carregouUmaVez) return; // não mostra erro se já carregou antes
+      if (carregouUmaVez) return;
       mostrarErro();
       return;
     }
@@ -116,10 +116,16 @@ function renderizar(d) {
   document.getElementById('cli-placa').textContent = d.placa;
   document.getElementById('cli-ano').textContent = d.ano;
   document.getElementById('cli-entrada').textContent = fmtData(d.criado_em);
-  document.getElementById('status-label').textContent = `Etapa ${d.status_atual} de 8 — ${ETAPAS[d.status_atual]?.titulo || ''}`;
+
+  const statusAtual = parseInt(d.status_atual);
+  const concluido = statusAtual === 8;
+
+  document.getElementById('status-label').textContent = concluido
+    ? 'Serviço Concluído ✅'
+    : `Etapa ${statusAtual} de 8 — ${ETAPAS[statusAtual]?.titulo || ''}`;
+
   document.getElementById('btn-wpp-footer').href = `https://wa.me/${whatsappOficina}?text=${encodeURIComponent(`Olá! Sou ${d.nome}, gostaria de saber mais sobre o serviço do meu veículo ${d.veiculo} (${d.placa}).`)}`;
 
-  // Esconde erro se estava visível
   document.getElementById('cli-erro').classList.add('hidden');
   document.getElementById('timeline').classList.remove('hidden');
 
@@ -129,12 +135,16 @@ function renderizar(d) {
     const e = ETAPAS[i];
     const hist = d.historico.find(h => h.etapa === i);
     const midias = d.midias.filter(m => m.etapa === i);
+
     let classe = 'futura';
-    if (i < d.status_atual) classe = 'concluida';
-    if (i === d.status_atual) classe = 'atual';
+    if (i < statusAtual) classe = 'concluida';
+    if (i === statusAtual) classe = concluido ? 'concluida' : 'atual';
+
     let iconeHtml = `<i class="fa ${e.icon}"></i>`;
     if (classe === 'concluida') iconeHtml = `<i class="fa fa-check"></i>`;
-    let badgeAgora = classe === 'atual' ? `<span class="badge-agora">AGORA</span>` : '';
+    let badgeAgora = (classe === 'atual') ? `<span class="badge-agora">AGORA</span>` : '';
+    if (concluido && i === 8) badgeAgora = `<span class="badge-agora" style="background:var(--verde)">CONCLUÍDO</span>`;
+
     let obsHtml = '';
     if (hist?.observacao && (classe === 'concluida' || classe === 'atual')) {
       obsHtml = `<div class="tl-obs"><strong><i class="fa fa-comment-alt"></i> Observação da oficina</strong>${hist.observacao}</div>`;
@@ -169,12 +179,12 @@ function renderizar(d) {
   }
   tl.innerHTML = html;
 
-  if (ultimoStatus !== -1 && d.status_atual !== ultimoStatus) {
+  if (ultimoStatus !== -1 && statusAtual !== ultimoStatus) {
     if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification('Ver Meu Carro', { body: `Seu veículo avançou para: ${ETAPAS[d.status_atual]?.titulo}` });
+      new Notification('Ver Meu Carro', { body: `Seu veículo avançou para: ${ETAPAS[statusAtual]?.titulo}` });
     }
   }
-  ultimoStatus = d.status_atual;
+  ultimoStatus = statusAtual;
 }
 
 function abrirFoto(src) {
