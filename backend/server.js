@@ -47,34 +47,46 @@ app.post('/api/atendimentos', (req, res) => {
   }
   const id = uuidv4().replace(/-/g, '').substr(0, 12).toUpperCase();
   const agora = new Date().toISOString();
-  db.prepare(`
-    INSERT INTO atendimentos (id, nome, telefone, veiculo, placa, ano, problema, status_atual, ativo, criado_em, atualizado_em)
-    VALUES (?, ?, ?, ?, ?, ?, ?, 1, 1, ?, ?)
-  `).run(id, nome, telefone.replace(/\D/g, ''), veiculo, placa.toUpperCase(), ano, problema || '', agora, agora);
-  db.prepare(`
-    INSERT INTO status_historico (atendimento_id, etapa, observacao, criado_em)
-    VALUES (?, 1, ?, ?)
-  `).run(id, 'Veículo recepcionado na MM ServiceCar.', agora);
-  const link = `${BASE_URL}/cliente.html?id=${id}`;
-  res.json({ id, link });
+
+  db.run(
+    `INSERT INTO atendimentos (id, nome, telefone, veiculo, placa, ano, problema, status_atual, ativo, criado_em, atualizado_em) VALUES (?, ?, ?, ?, ?, ?, ?, 1, 1, ?, ?)`,
+    [id, nome, telefone.replace(/\D/g, ''), veiculo, placa.toUpperCase(), ano, problema || '', agora, agora],
+    function(err) {
+      if (err) return res.status(500).json({ erro: err.message });
+      db.run(
+        `INSERT INTO status_historico (atendimento_id, etapa, observacao, criado_em) VALUES (?, 1, ?, ?)`,
+        [id, 'Veículo recepcionado na MM ServiceCar.', agora]
+      );
+      const link = `${BASE_URL}/cliente.html?id=${id}`;
+      res.json({ id, link });
+    }
+  );
 });
 
 app.get('/api/atendimentos', (req, res) => {
-  const ativos = db.prepare(`SELECT * FROM atendimentos WHERE ativo = 1 ORDER BY criado_em DESC`).all();
-  res.json(ativos);
+  db.all(`SELECT * FROM atendimentos WHERE ativo = 1 ORDER BY criado_em DESC`, [], (err, rows) => {
+    if (err) return res.status(500).json({ erro: err.message });
+    res.json(rows);
+  });
 });
 
 app.get('/api/historico', (req, res) => {
-  const encerrados = db.prepare(`SELECT * FROM atendimentos WHERE ativo = 0 ORDER BY atualizado_em DESC`).all();
-  res.json(encerrados);
+  db.all(`SELECT * FROM atendimentos WHERE ativo = 0 ORDER BY atualizado_em DESC`, [], (err, rows) => {
+    if (err) return res.status(500).json({ erro: err.message });
+    res.json(rows);
+  });
 });
 
 app.get('/api/atendimentos/:id', (req, res) => {
-  const at = db.prepare('SELECT * FROM atendimentos WHERE id = ?').get(req.params.id);
-  if (!at) return res.status(404).json({ erro: 'Atendimento não encontrado' });
-  const historico = db.prepare(`SELECT * FROM status_historico WHERE atendimento_id = ? ORDER BY etapa ASC`).all(req.params.id);
-  const midias = db.prepare(`SELECT * FROM midias WHERE atendimento_id = ? ORDER BY criado_em ASC`).all(req.params.id);
-  res.json({ ...at, historico, midias });
+  db.get(`SELECT * FROM atendimentos WHERE id = ?`, [req.params.id], (err, at) => {
+    if (err) return res.status(500).json({ erro: err.message });
+    if (!at) return res.status(404).json({ erro: 'Atendimento não encontrado' });
+    db.all(`SELECT * FROM status_historico WHERE atendimento_id = ? ORDER BY etapa ASC`, [req.params.id], (err2, historico) => {
+      db.all(`SELECT * FROM midias WHERE atendimento_id = ? ORDER BY criado_em ASC`, [req.params.id], (err3, midias) => {
+        res.json({ ...at, historico: historico || [], midias: midias || [] });
+      });
+    });
+  });
 });
 
 app.post('/api/atendimentos/:id/status', upload.fields([
@@ -82,23 +94,38 @@ app.post('/api/atendimentos/:id/status', upload.fields([
   { name: 'video', maxCount: 1 }
 ]), (req, res) => {
   const { etapa, observacao } = req.body;
-  const at = db.prepare('SELECT * FROM atendimentos WHERE id = ?').get(req.params.id);
-  if (!at) return res.status(404).json({ erro: 'Não encontrado' });
   const novaEtapa = parseInt(etapa);
   const agora = new Date().toISOString();
-  db.prepare(`UPDATE atendimentos SET status_atual = ?, atualizado_em = ? WHERE id = ?`).run(novaEtapa, agora, req.params.id);
-  db.prepare(`INSERT INTO status_historico (atendimento_id, etapa, observacao, criado_em) VALUES (?, ?, ?, ?)`).run(req.params.id, novaEtapa, observacao || '', agora);
-  if (req.files) {
-    const salvarMidia = db.prepare(`INSERT INTO midias (atendimento_id, etapa, tipo, filename, criado_em) VALUES (?, ?, ?, ?, ?)`);
-    if (req.files.fotos) req.files.fotos.forEach(f => salvarMidia.run(req.params.id, novaEtapa, 'foto', f.filename, agora));
-    if (req.files.video) req.files.video.forEach(f => salvarMidia.run(req.params.id, novaEtapa, 'video', f.filename, agora));
-  }
-  res.json({ ok: true });
+
+  db.run(`UPDATE atendimentos SET status_atual = ?, atualizado_em = ? WHERE id = ?`,
+    [novaEtapa, agora, req.params.id], function(err) {
+      if (err) return res.status(500).json({ erro: err.message });
+      db.run(`INSERT INTO status_historico (atendimento_id, etapa, observacao, criado_em) VALUES (?, ?, ?, ?)`,
+        [req.params.id, novaEtapa, observacao || '', agora]);
+      if (req.files) {
+        if (req.files.fotos) {
+          req.files.fotos.forEach(f => {
+            db.run(`INSERT INTO midias (atendimento_id, etapa, tipo, filename, criado_em) VALUES (?, ?, ?, ?, ?)`,
+              [req.params.id, novaEtapa, 'foto', f.filename, agora]);
+          });
+        }
+        if (req.files.video) {
+          req.files.video.forEach(f => {
+            db.run(`INSERT INTO midias (atendimento_id, etapa, tipo, filename, criado_em) VALUES (?, ?, ?, ?, ?)`,
+              [req.params.id, novaEtapa, 'video', f.filename, agora]);
+          });
+        }
+      }
+      res.json({ ok: true });
+    });
 });
 
 app.post('/api/atendimentos/:id/encerrar', (req, res) => {
-  db.prepare(`UPDATE atendimentos SET ativo = 0, atualizado_em = ? WHERE id = ?`).run(new Date().toISOString(), req.params.id);
-  res.json({ ok: true });
+  db.run(`UPDATE atendimentos SET ativo = 0, atualizado_em = ? WHERE id = ?`,
+    [new Date().toISOString(), req.params.id], function(err) {
+      if (err) return res.status(500).json({ erro: err.message });
+      res.json({ ok: true });
+    });
 });
 
 app.get('/api/config', (req, res) => {
@@ -107,6 +134,6 @@ app.get('/api/config', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`\n🚗 MM ServiceCar rodando em http://localhost:${PORT}`);
-  console.log(`📋 Painel da oficina: http://localhost:${PORT}/painel.html`);
+  console.log(`📋 Painel: http://localhost:${PORT}/painel.html`);
   console.log(`🔑 Senha: ${SENHA_PAINEL}\n`);
 });

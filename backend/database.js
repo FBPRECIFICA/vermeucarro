@@ -1,12 +1,10 @@
-const Database = require('better-sqlite3');
+const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
-const fs = require('fs');
 
-const dbDir = path.join(__dirname);
-const db = new Database(path.join(dbDir, 'data.db'));
+const db = new sqlite3.Database(path.join(__dirname, 'data.db'));
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS atendimentos (
+db.serialize(() => {
+  db.run(`CREATE TABLE IF NOT EXISTS atendimentos (
     id TEXT PRIMARY KEY,
     nome TEXT NOT NULL,
     telefone TEXT NOT NULL,
@@ -18,26 +16,24 @@ db.exec(`
     ativo INTEGER DEFAULT 1,
     criado_em TEXT NOT NULL,
     atualizado_em TEXT NOT NULL
-  );
+  )`);
 
-  CREATE TABLE IF NOT EXISTS status_historico (
+  db.run(`CREATE TABLE IF NOT EXISTS status_historico (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     atendimento_id TEXT NOT NULL,
     etapa INTEGER NOT NULL,
     observacao TEXT,
-    criado_em TEXT NOT NULL,
-    FOREIGN KEY (atendimento_id) REFERENCES atendimentos(id)
-  );
+    criado_em TEXT NOT NULL
+  )`);
 
-  CREATE TABLE IF NOT EXISTS midias (
+  db.run(`CREATE TABLE IF NOT EXISTS midias (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     atendimento_id TEXT NOT NULL,
     etapa INTEGER NOT NULL,
     tipo TEXT NOT NULL,
     filename TEXT NOT NULL,
-    criado_em TEXT NOT NULL,
-    FOREIGN KEY (atendimento_id) REFERENCES atendimentos(id)
-  );
-`);
+    criado_em TEXT NOT NULL
+  )`);
+});
 
 module.exports = db;
