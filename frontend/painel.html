@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ver Meu Carro — Painel da Oficina</title>
+<title>Ver Meu Carro - Painel da Oficina</title>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="app.js" defer></script>
 </head>
 <body>
 
@@ -14,7 +15,7 @@
   <div class="login-card">
     <div class="logo-login">Ver Meu <em>Carro</em></div>
     <p>Painel interno da oficina</p>
-    <input type="password" id="input-senha" placeholder="••••••••" maxlength="30">
+    <input type="password" id="input-senha" placeholder="........" maxlength="30">
     <button class="btn btn-vermelho" onclick="fazerLogin()">
       <i class="fa fa-lock"></i> Entrar
     </button>
@@ -63,4 +64,94 @@
           </div>
           <div class="form-group">
             <label>Modelo do Veiculo *</label>
-            <input typ 
+            <input type="text" id="f-veiculo" placeholder="Ex: Fiat Argo">
+          </div>
+          <div class="form-group">
+            <label>Placa *</label>
+            <input type="text" id="f-placa" placeholder="Ex: ABC-1234" style="text-transform:uppercase">
+          </div>
+          <div class="form-group">
+            <label>Ano *</label>
+            <input type="text" id="f-ano" placeholder="Ex: 2023">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label>Descricao do Problema (opcional)</label>
+          <textarea id="f-problema" placeholder="Descreva o que o cliente relatou..."></textarea>
+        </div>
+        <button class="btn btn-vermelho" onclick="cadastrar()">
+          <i class="fa fa-save"></i> Cadastrar e Gerar Link
+        </button>
+      </div>
+
+      <div class="link-gerado hidden" id="link-gerado-box">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <i class="fa fa-check-circle" style="color:var(--verde);font-size:22px"></i>
+          <strong style="font-size:16px">Atendimento cadastrado com sucesso!</strong>
+        </div>
+        <p style="font-size:13px;color:#555;margin-bottom:8px">Link de acompanhamento do cliente:</p>
+        <div class="link-url" id="link-url-texto"></div>
+        <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+          <canvas id="qr-code" style="border-radius:8px;border:4px solid #fff;box-shadow:var(--sombra)"></canvas>
+          <div class="link-acoes">
+            <button class="btn btn-preto btn-sm" onclick="copiarLink()">
+              <i class="fa fa-copy"></i> Copiar Link
+            </button>
+            <a id="btn-whatsapp-envio" class="btn btn-verde btn-sm" target="_blank">
+              <i class="fab fa-whatsapp"></i> Enviar pelo WhatsApp
+            </a>
+            <button class="btn btn-outline btn-sm" onclick="novoAtendimento()">
+              <i class="fa fa-plus"></i> Novo
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="aba-ativos" class="hidden">
+      <div id="lista-ativos">
+        <div style="text-align:center;padding:40px;color:#aaa">
+          <i class="fa fa-spinner fa-spin" style="font-size:28px"></i>
+          <p>Carregando...</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="aba-historico" class="hidden">
+      <div id="lista-historico">
+        <div style="text-align:center;padding:40px;color:#aaa">
+          <p>Selecione a aba Historico para carregar.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay hidden" id="modal-status">
+  <div class="modal">
+    <h3><i class="fa fa-edit" style="color:var(--vermelho)"></i> Atualizar Status</h3>
+    <p style="font-size:13px;color:#666;margin-bottom:16px">Selecione a nova etapa:</p>
+    <div class="etapas-select" id="etapas-grid"></div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label>Observacao personalizada (opcional)</label>
+      <textarea id="modal-obs" rows="2" placeholder="Ex: Peca chegara amanha as 10h..."></textarea>
+    </div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label><i class="fa fa-camera" style="color:var(--vermelho)"></i> Fotos do veiculo (multiplas)</label>
+      <input type="file" id="modal-fotos" accept="image/*" multiple style="font-size:13px">
+    </div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label><i class="fa fa-video" style="color:var(--vermelho)"></i> Videos (multiplos, MP4, ate 200MB cada)</label>
+      <input type="file" id="modal-videos" accept="video/*" multiple style="font-size:13px">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-gray" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-vermelho" id="btn-confirmar-status">
+        <i class="fa fa-check"></i> Confirmar Atualizacao
+      </button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
