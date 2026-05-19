@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MM ServiceCar — Acompanhe seu Serviço</title>
+<title>Ver Meu Carro — Acompanhe seu Serviço</title>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <meta name="theme-color" content="#1a1a1a">
@@ -12,7 +12,7 @@
 
 <div class="cliente-wrapper">
   <div class="cliente-header">
-    <div class="logo-cliente">MM <em>Service</em>Car</div>
+    <div class="logo-cliente">Ver Meu <em>Carro</em></div>
     <div class="saudacao">Olá,</div>
     <div class="nome-cliente" id="cli-nome">Carregando...</div>
     <div class="veiculo-info">
@@ -43,7 +43,7 @@
 </div>
 
 <footer class="cliente-footer">
-  <span>© MM ServiceCar</span>
+  <span>© Ver Meu Carro</span>
   <a id="btn-wpp-footer" class="btn btn-whatsapp btn-sm" target="_blank">
     <i class="fab fa-whatsapp"></i> Falar com a oficina
   </a>
@@ -56,20 +56,21 @@
 <script>
 const ETAPAS = [
   null,
-  { icon: 'fa-flag-checkered', titulo: 'Veículo Recepcionado', msg: nome => `Olá ${nome}! Seu veículo foi recepcionado com sucesso na MM ServiceCar. Em breve você receberá mais atualizações por aqui. Fique tranquilo, seu carro está em boas mãos! 🙌` },
+  { icon: 'fa-flag-checkered', titulo: 'Veículo Recepcionado', msg: nome => `Olá ${nome}! Seu veículo foi recepcionado com sucesso. Em breve você receberá mais atualizações por aqui. Fique tranquilo, seu carro está em boas mãos! 🙌` },
   { icon: 'fa-search', titulo: 'Em Diagnóstico', msg: () => 'Seu veículo acaba de ser encaminhado para a área de diagnóstico. Nosso mecânico especialista está iniciando a análise completa do problema. Aguarde, logo teremos novidades! 🔧' },
   { icon: 'fa-camera', titulo: 'Coletando Evidências do Problema', msg: () => 'Identificamos o problema no seu veículo! Nosso mecânico está registrando as evidências técnicas com fotos e vídeo detalhados para elaborar seu orçamento com total transparência. 📋' },
   { icon: 'fa-file-invoice-dollar', titulo: 'Encaminhado para Orçamentação', msg: () => 'As evidências foram coletadas e seu veículo foi encaminhado para nossa equipe de orçamentação. Em breve você receberá o valor detalhado do serviço. ⏳' },
   { icon: 'fa-envelope-open-text', titulo: 'Orçamento Enviado — Aguardando Aprovação', msg: () => 'Seu orçamento foi elaborado e enviado! Por favor, entre em contato conosco para aprovação e assim que confirmado daremos início imediato ao serviço. ✅' },
   { icon: 'fa-thumbs-up', titulo: 'Orçamento Aprovado', msg: () => 'Ótimo! Orçamento aprovado! Seu veículo já está na fila de serviço e em breve nossos mecânicos darão início ao reparo. Obrigado pela confiança! 💪' },
   { icon: 'fa-cogs', titulo: 'Em Serviço', msg: () => 'Seu veículo está em serviço agora! Nossa equipe está trabalhando com cuidado e dedicação para resolver tudo o mais rápido possível. 🛠️' },
-  { icon: 'fa-check-circle', titulo: 'Concluído — Pode Buscar Seu Carro!', msg: nome => `Parabéns ${nome}! O serviço no seu veículo foi concluído com sucesso! Você já pode vir buscar seu carro. Obrigado por confiar na MM ServiceCar! Até a próxima! 🚗💨` }
+  { icon: 'fa-check-circle', titulo: 'Concluído — Pode Buscar Seu Carro!', msg: nome => `Parabéns ${nome}! O serviço no seu veículo foi concluído com sucesso! Você já pode vir buscar seu carro. Obrigado pela confiança! Até a próxima! 🚗💨` }
 ];
 
 const params = new URLSearchParams(location.search);
 const ID = params.get('id');
 let whatsappOficina = '5522999999999';
 let ultimoStatus = -1;
+let carregouUmaVez = false;
 
 function tempoRelativo(isoStr) {
   const diff = Date.now() - new Date(isoStr).getTime();
@@ -90,10 +91,17 @@ async function carregar() {
   if (!ID) { mostrarErro(); return; }
   try {
     const r = await fetch(`/api/atendimentos/${ID}`);
-    if (!r.ok) { mostrarErro(); return; }
+    if (!r.ok) {
+      if (carregouUmaVez) return; // não mostra erro se já carregou antes
+      mostrarErro();
+      return;
+    }
     const d = await r.json();
+    carregouUmaVez = true;
     renderizar(d);
-  } catch { mostrarErro(); }
+  } catch {
+    if (!carregouUmaVez) mostrarErro();
+  }
 }
 
 function mostrarErro() {
@@ -102,7 +110,7 @@ function mostrarErro() {
 }
 
 function renderizar(d) {
-  document.title = `${d.nome} — MM ServiceCar`;
+  document.title = `${d.nome} — Ver Meu Carro`;
   document.getElementById('cli-nome').textContent = d.nome;
   document.getElementById('cli-veiculo').textContent = d.veiculo;
   document.getElementById('cli-placa').textContent = d.placa;
@@ -110,6 +118,10 @@ function renderizar(d) {
   document.getElementById('cli-entrada').textContent = fmtData(d.criado_em);
   document.getElementById('status-label').textContent = `Etapa ${d.status_atual} de 8 — ${ETAPAS[d.status_atual]?.titulo || ''}`;
   document.getElementById('btn-wpp-footer').href = `https://wa.me/${whatsappOficina}?text=${encodeURIComponent(`Olá! Sou ${d.nome}, gostaria de saber mais sobre o serviço do meu veículo ${d.veiculo} (${d.placa}).`)}`;
+
+  // Esconde erro se estava visível
+  document.getElementById('cli-erro').classList.add('hidden');
+  document.getElementById('timeline').classList.remove('hidden');
 
   const tl = document.getElementById('timeline');
   let html = '';
@@ -156,9 +168,10 @@ function renderizar(d) {
       </div>`;
   }
   tl.innerHTML = html;
+
   if (ultimoStatus !== -1 && d.status_atual !== ultimoStatus) {
     if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification('MM ServiceCar', { body: `Seu veículo avançou para: ${ETAPAS[d.status_atual]?.titulo}` });
+      new Notification('Ver Meu Carro', { body: `Seu veículo avançou para: ${ETAPAS[d.status_atual]?.titulo}` });
     }
   }
   ultimoStatus = d.status_atual;
