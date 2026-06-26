@@ -88,8 +88,12 @@ async function cadastrar() {
     linkAtual = d.link;
     document.getElementById('link-url-texto').textContent = d.link;
 
-    const canvas = document.getElementById('qr-code');
-    QRCode.toCanvas(canvas, d.link, { width: 120, margin: 1 });
+    try {
+      const canvas = document.getElementById('qr-code');
+      QRCode.toCanvas(canvas, d.link, { width: 120, margin: 1 });
+    } catch (qrErr) {
+      console.warn('QR Code nao gerado:', qrErr);
+    }
 
     const msg = encodeURIComponent(
       `Ola ${nome}! Seu veiculo ja esta conosco. Acompanhe o progresso do servico em tempo real: ${d.link}`
