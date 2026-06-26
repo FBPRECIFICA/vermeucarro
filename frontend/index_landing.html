@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Ver Meu Carro — Acompanhamento de Serviço em Tempo Real</title>
+<meta name="description" content="Seu cliente acompanha o carro em tempo real. Gere um link em segundos com fotos e vídeos de cada etapa. Sem app. R$29,90/mês."/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0d0d0d;color:#f0f0f0}
+a{text-decoration:none;color:inherit}
+/* NAV */
+nav{background:#111;border-bottom:1px solid #222;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:34px;height:34px;background:#cc1f1f;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;color:#fff}
+.logo-name{font-size:16px;font-weight:700;color:#fff}
+.logo-name em{color:#cc1f1f;font-style:normal}
+.nav-right{display:flex;align-items:center;gap:12px}
+.btn-entrar{background:transparent;border:1.5px solid #555;color:#ddd;padding:7px 18px;border-radius:7px;font-size:13px;cursor:pointer;font-weight:600}
+.btn-entrar:hover{border-color:#cc1f1f;color:#fff}
+.btn-assinar-nav{background:#cc1f1f;border:none;color:#fff;padding:8px 20px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer}
+.btn-assinar-nav:hover{background:#a81818}
+/* HERO */
+.hero{padding:72px 32px 56px;text-align:center;border-bottom:1px solid #1a1a1a}
+.badge{display:inline-flex;align-items:center;gap:6px;background:#1a0a0a;border:1px solid #3a1111;color:#ff6b6b;font-size:11px;font-weight:600;padding:5px 14px;border-radius:20px;margin-bottom:24px}
+.badge-dot{width:6px;height:6px;background:#cc1f1f;border-radius:50%;display:inline-block}
+.hero h1{font-size:46px;font-weight:900;line-height:1.15;color:#fff;margin-bottom:16px}
+.hero h1 em{color:#cc1f1f;font-style:normal}
+.hero p{font-size:17px;color:#999;line-height:1.7;max-width:520px;margin:0 auto 40px}
+.hero-btns{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.btn-cta{background-color:#cc1f1f;border:none;color:#fff;padding:16px 36px;border-radius:9px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit}
+.btn-cta:hover{background-color:#a81818}
+.btn-demo{background-color:#2a2a2a;border:2px solid #555;color:#fff;padding:16px 28px;border-radius:9px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-demo:hover{border-color:#888;background:#333}
+.hero-sub{font-size:13px;color:#666}
+/* MOCKUP */
+.mockup-wrap{margin:48px auto 0;max-width:680px;padding:0 32px}
+.mockup{background:#111;border:1px solid #222;border-radius:12px;overflow:hidden}
+.mockup-bar{background:#1a1a1a;padding:10px 16px;display:flex;align-items:center;gap:6px;border-bottom:1px solid #222}
+.dot{width:10px;height:10px;border-radius:50%}
+.mockup-url{margin-left:10px;background:#222;border-radius:5px;padding:3px 16px;font-size:11px;color:#666}
+.mockup-content{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mc-card{background:#0d0d0d;border:1px solid #1e1e1e;border-radius:8px;padding:14px}
+.mc-nome{font-size:13px;font-weight:700;color:#fff;margin-bottom:4px}
+.mc-veiculo{font-size:11px;color:#666;margin-bottom:10px}
+.mc-status{display:inline-flex;align-items:center;gap:5px;background:#1a2a1a;border:1px solid #1e3a1e;color:#4ade80;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px}
+.mc-status-dot{width:5px;height:5px;border-radius:50%;background:#4ade80;display:inline-block}
+.mc-link{margin-top:8px;font-size:10px;color:#cc1f1f}
+/* SECTIONS */
+.section{padding:64px 32px;border-bottom:1px solid #1a1a1a;max-width:800px;margin:0 auto}
+.section-full{padding:64px 32px;border-bottom:1px solid #1a1a1a}
+.sec-label{font-size:10px;font-weight:700;color:#cc1f1f;text-transform:uppercase;letter-spacing:.12em;text-align:center;margin-bottom:10px}
+.sec-title{font-size:30px;font-weight:900;color:#fff;text-align:center;margin-bottom:10px}
+.sec-sub{font-size:14px;color:#666;text-align:center;margin-bottom:44px;line-height:1.7}
+/* FEATURES */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:600px){.features{grid-template-columns:1fr 1fr}}
+.feat{background:#111;border:1px solid #1e1e1e;border-radius:12px;padding:20px}
+.feat-icon{width:40px;height:40px;background:#1a0a0a;border:1px solid #2a1111;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:18px;color:#cc1f1f}
+.feat h3{font-size:14px;font-weight:700;color:#fff;margin-bottom:6px}
+.feat p{font-size:12px;color:#666;line-height:1.6}
+/* STEPS */
+.steps{display:flex;flex-direction:column;max-width:500px;margin:0 auto}
+.step{display:flex;gap:16px}
+.step-line{display:flex;flex-direction:column;align-items:center}
+.step-num{width:32px;height:32px;border-radius:50%;background:#cc1f1f;color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-vert{width:1px;background:#222;flex:1;min-height:20px;margin:4px 0}
+.step:last-child .step-vert{display:none}
+.step-body{padding-bottom:28px}
+.step-body h4{font-size:14px;font-weight:700;color:#fff;margin-bottom:4px}
+.step-body p{font-size:13px;color:#666;line-height:1.6}
+/* PRECO */
+.preco-card{background:#111;border:2px solid #cc1f1f;border-radius:16px;padding:40px;max-width:400px;margin:0 auto;text-align:center}
+.preco-label{font-size:12px;font-weight:700;color:#cc1f1f;text-transform:uppercase;letter-spacing:.1em;margin-bottom:20px}
+.preco-valor{font-size:56px;font-weight:900;color:#fff;line-height:1}
+.preco-valor .cifrao{font-size:20px;font-weight:400;color:#888;vertical-align:top;margin-top:10px;display:inline-block}
+.preco-valor .centavos{font-size:20px;font-weight:400;color:#888}
+.preco-periodo{font-size:13px;color:#555;margin:6px 0 28px}
+.preco-items{text-align:left;margin-bottom:28px}
+.pi{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #1a1a1a;font-size:13px;color:#ccc}
+.pi:last-child{border-bottom:none}
+.pi i{color:#cc1f1f;font-size:14px;width:16px}
+.btn-assinar-full{width:100%;background-color:#cc1f1f;border:none;color:#fff;padding:16px;border-radius:9px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit}
+.btn-assinar-full:hover{background:#a81818}
+.trial-txt{font-size:12px;color:#555;margin-top:12px}
+/* FOOTER */
+footer{padding:28px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-logo{font-size:14px;font-weight:700;color:#444}
+.footer-logo em{color:#cc1f1f;font-style:normal}
+.footer-copy{font-size:12px;color:#333}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <div class="logo-mark">VC</div>
+    <div class="logo-name">Ver Meu <em>Carro</em></div>
+  </div>
+  <div class="nav-right">
+    <a href="/painel.html"><button class="btn-entrar"><i class="fa fa-lock" style="margin-right:6px"></i>Entrar</button></a>
+    <button class="btn-assinar-nav" onclick="document.getElementById('preco').scrollIntoView({behavior:'smooth'})">Assinar agora</button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="badge"><span class="badge-dot"></span> Novo para oficinas</div>
+  <h1>Seu cliente acompanha<br>o carro em <em>tempo real</em></h1>
+  <p>Gere um link em segundos. O cliente vê cada etapa do serviço, com fotos e vídeos, direto no celular. Sem app. Sem ligação.</p>
+  <div class="hero-btns">
+    <button class="btn-cta" onclick="document.getElementById('preco').scrollIntoView({behavior:'smooth'})">
+      <i class="fa fa-bolt" style="margin-right:8px"></i>Assinar agora — R$29,90/mês
+    </button>
+    <button class="btn-demo" onclick="document.getElementById('como-funciona').scrollIntoView({behavior:'smooth'})">
+      <i class="fa fa-play" style="margin-right:8px"></i>Ver como funciona
+    </button>
+  </div>
+  <p class="hero-sub">7 dias grátis · sem cartão para testar</p>
+</section>
+
+<div class="mockup-wrap">
+  <div class="mockup">
+    <div class="mockup-bar">
+      <span class="dot" style="background:#ff5f56"></span>
+      <span class="dot" style="background:#febc2e"></span>
+      <span class="dot" style="background:#27c840"></span>
+      <span class="mockup-url">vermeucarro.com.br/painel</span>
+    </div>
+    <div class="mockup-content">
+      <div class="mc-card">
+        <div class="mc-nome">João Silva</div>
+        <div class="mc-veiculo">Fiat Argo — ABC-1234 — 2022</div>
+        <div class="mc-status"><span class="mc-status-dot"></span> Em serviço</div>
+        <div class="mc-link">vermeucarro.com.br/cliente?id=A3F9</div>
+      </div>
+      <div class="mc-card">
+        <div class="mc-nome">Maria Santos</div>
+        <div class="mc-veiculo">HB20 — XYZ-5678 — 2023</div>
+        <div class="mc-status"><span class="mc-status-dot"></span> Orçamento aprovado</div>
+        <div class="mc-link">vermeucarro.com.br/cliente?id=C7D1</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-full">
+  <div class="sec-label">Diferenciais</div>
+  <div class="sec-title">Tudo que sua oficina precisa</div>
+  <div class="sec-sub">Profissionalismo que fideliza clientes e elimina ligações desnecessárias</div>
+  <div class="features" style="max-width:800px;margin:0 auto">
+    <div class="feat">
+      <div class="feat-icon"><i class="fa fa-eye"></i></div>
+      <h3>Acompanhamento real</h3>
+      <p>Cliente vê cada etapa atualizada em tempo real. Zero ligação perguntando "cadê meu carro".</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon"><i class="fa fa-camera"></i></div>
+      <h3>Fotos e vídeos</h3>
+      <p>Evidências visuais de cada etapa. Protege a oficina e transmite transparência total ao cliente.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon"><i class="fab fa-whatsapp"></i></div>
+      <h3>Link pelo WhatsApp</h3>
+      <p>Envie o link direto no zap. Cliente abre no celular sem instalar nenhum aplicativo.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon"><i class="fa fa-shield-alt"></i></div>
+      <h3>Prova de serviço</h3>
+      <p>Histórico completo com fotos elimina reclamações futuras. Sua oficina sempre protegida.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon"><i class="fa fa-heart"></i></div>
+      <h3>Fidelização garantida</h3>
+      <p>Cliente que experimenta a transparência não volta para oficina que não tem isso.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon"><i class="fa fa-mobile-alt"></i></div>
+      <h3>Zero configuração</h3>
+      <p>Acessa pelo navegador, funciona em qualquer celular. Sem app, sem treinamento complexo.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section-full" id="como-funciona">
+  <div class="sec-label">Como funciona</div>
+  <div class="sec-title" style="margin-bottom:40px">Em 3 passos simples</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-line"><div class="step-num">1</div><div class="step-vert"></div></div>
+      <div class="step-body">
+        <h4>Cadastre o veículo</h4>
+        <p>Informe nome, placa e o problema. O sistema gera o link do cliente em segundos.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">2</div><div class="step-vert"></div></div>
+      <div class="step-body">
+        <h4>Envie o link pelo WhatsApp</h4>
+        <p>O cliente recebe e já pode acompanhar tudo em tempo real pelo celular.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-line"><div class="step-num">3</div><div class="step-vert"></div></div>
+      <div class="step-body">
+        <h4>Atualize as etapas com fotos</h4>
+        <p>A cada avanço no serviço, atualize a etapa. O cliente vê na hora, sem ligar.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-full" id="preco" style="text-align:center">
+  <div class="sec-label">Preço</div>
+  <div class="sec-title" style="margin-bottom:36px">Simples e acessível</div>
+  <div class="preco-card">
+    <div class="preco-label">Plano Oficina</div>
+    <div class="preco-valor"><span class="cifrao">R$</span>29<span class="centavos">,90</span></div>
+    <div class="preco-periodo">por mês · cancele quando quiser</div>
+    <div class="preco-items">
+      <div class="pi"><i class="fa fa-check"></i> Atendimentos ilimitados</div>
+      <div class="pi"><i class="fa fa-check"></i> Fotos e vídeos por etapa</div>
+      <div class="pi"><i class="fa fa-check"></i> Link WhatsApp automático</div>
+      <div class="pi"><i class="fa fa-check"></i> Histórico completo</div>
+      <div class="pi"><i class="fa fa-check"></i> Suporte via WhatsApp</div>
+    </div>
+    <button class="btn-assinar-full">Assinar agora</button>
+    <div class="trial-txt">7 dias grátis · sem cartão para testar</div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">Ver Meu <em>Carro</em></div>
+  <div class="footer-copy">© 2026 FBE Tecnologia Ltda · vermeucarro.com.br</div>
+</footer>
+
+</body>
+</html>
